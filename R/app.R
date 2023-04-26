@@ -19,6 +19,22 @@ luV3_phv = c("phenotype_ck", "phenotype_cd8", "phenotype_cd14", "phenotype_other
 "phenotype_cd19", "phenotype_cd4")
 
 
+#' produce a factor with 'positive' cell type values for SpatialExperiment annotated like EH7312
+#' @param spe SpatialExperiment instance
+#' @param inds numeric() indices of 'phenotype' variables in `colData(spe)`
+#' @param opts character() prefixes of values for phenotype values
+#' @note This is a speculative implementation.  If multiple factors for a cell
+#' are positive, the last one (in the ordering of `opts`) is used.
+#' @examples
+#' requireNamespace("SummarizedExperiment")
+#' data(litov)
+#' if ("multicol" %in% names(SummarizedExperiment::colData(litov))) {
+#'   wh = which(names(SummarizedExperiment::colData(litov)) == "multicol")
+#'   colData(litov) = SummarizedExperiment::colData(litov)[,-wh]
+#'   }
+#' litov = add_multicol(litov)
+#' table(litov$multicol, exclude=NULL)
+#' @export
 add_multicol = function(spe, inds=188:194, opts = c("CD68", "CK", "CD19", "CD3", "CD8")) {
  mymat = data.matrix(colData(spe)[,inds])
  nopts = paste0(opts, rep(c("+", "-"), each=5))
@@ -28,7 +44,16 @@ add_multicol = function(spe, inds=188:194, opts = c("CD68", "CK", "CD19", "CD3",
  spe
 }
 
+#' use ggplot to display cell phenotype over positions
+#' @param spe SpatialExperiment instance
+#' @param colvar character(1) phenotype label
+#' @param \dots passed to geom_point
+#' @examples
+#' data(litov)
+#' show_core(litov)
+#' @export
 show_core = function(spe, colvar = "phenotype_cd8", ...) {
+  stopifnot(colvar %in% names(colData(spe)))
   xy = spatialCoords(spe)
   datf = data.frame(x=xy[,1], y=xy[,2])
   datf$feat = factor(colData(spe)[, colvar])
