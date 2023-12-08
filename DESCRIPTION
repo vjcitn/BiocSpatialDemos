@@ -1,7 +1,7 @@
 Package: BiocSpatialDemos
-Date: 2022-10-01
+Date: 2023-05-17
 Title: Demonstration of work with selected spatial genomics datasets
-Version: 0.0.1
+Version: 0.0.3
 Authors@R: 
     c(person(
         "Vincent", "Carey", role = c("aut", "cre"),
@@ -12,7 +12,7 @@ Authors@R:
 Description: Demonstration of work with selected spatial genomics datasets
 License: Artistic-2.0
 Encoding: UTF-8
-Depends: R (>= 3.6), dplyr, SpatialExperiment
+Depends: R (>= 3.6), dplyr, SpatialExperiment, plotly
 Suggests: knitr, testthat, SummarizedExperiment, ExperimentHub
 Imports: DT, ggplot2, shiny
 VignetteBuilder: knitr

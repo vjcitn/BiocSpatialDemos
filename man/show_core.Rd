@@ -4,12 +4,22 @@
 \alias{show_core}
 \title{use ggplot to display cell phenotype over positions}
 \usage{
-show_core(spe, colvar = "phenotype_cd8", ...)
+show_core(
+  spe,
+  colvar = "phenotype_cd8",
+  legend_glyph_size = 5,
+  legend_font_size = 14,
+  ...
+)
 }
 \arguments{
 \item{spe}{SpatialExperiment instance}
 
 \item{colvar}{character(1) phenotype label}
+
+\item{legend_glyph_size}{numeric(1) passed to `override.aes = list(size=)` in `guides(colour...` defaults to 5}
+
+\item{legend_font_size}{numeric(1) passed to `theme(legend.text=element_text(size=))`, defaults to 14}
 
 \item{\dots}{passed to geom_point}
 }

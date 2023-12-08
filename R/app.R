@@ -47,17 +47,31 @@ add_multicol = function(spe, inds=188:194, opts = c("CD68", "CK", "CD19", "CD3",
 #' use ggplot to display cell phenotype over positions
 #' @param spe SpatialExperiment instance
 #' @param colvar character(1) phenotype label
+#' @param legend_glyph_size numeric(1) passed to `override.aes = list(size=)` in `guides(colour...` defaults to 5
+#' @param legend_font_size numeric(1) passed to `theme(legend.text=element_text(size=))`, defaults to 14
 #' @param \dots passed to geom_point
 #' @examples
 #' data(litov)
 #' show_core(litov)
 #' @export
-show_core = function(spe, colvar = "phenotype_cd8", ...) {
+show_core = function (spe, colvar = "phenotype_cd8", legend_glyph_size = 5, legend_font_size = 14, 
+    ...) 
+{
+    stopifnot(colvar %in% names(colData(spe)))
+    xy = spatialCoords(spe)
+    datf = data.frame(x = xy[, 1], y = xy[, 2])
+    datf$pheno = factor(colData(spe)[, colvar])
+    ggplot(datf, aes(x = x, y = y, colour = pheno)) + geom_point(...) + 
+        labs(title = spe$sample_id[1]) + guides(colour = guide_legend(override.aes = list(size=legend_glyph_size))) + theme(legend.text = element_text(size = legend_font_size))
+}
+
+show_core_old = function(spe, colvar = "phenotype_cd8", legend_font_size=14, ...) {
   stopifnot(colvar %in% names(colData(spe)))
   xy = spatialCoords(spe)
   datf = data.frame(x=xy[,1], y=xy[,2])
   datf$feat = factor(colData(spe)[, colvar])
-  ggplot(datf, aes(x=x, y=y, colour=feat)) + geom_point(...) + labs(title=spe$sample_id[1])
+  ggplot(datf, aes(x=x, y=y, colour=feat)) + geom_point(...) + labs(title=spe$sample_id[1]) +
+     theme(legend.text=element_text(size=legend_font_size))
 }
  
 
@@ -120,7 +134,7 @@ display_by_core = function(spe, phv, add_cd4=TRUE, add_multicol=TRUE) {
     ),
    mainPanel(
     tabsetPanel(
-     tabPanel("core", plotOutput("coreview", height="550px")),
+     tabPanel("core", plotlyOutput("coreview", height="550px")),
      tabPanel("phdata", DT::dataTableOutput("datatab")),
      tabPanel("about", helpText("Data described in PMID 34615692.  We use CD3+ and CD8- to label cells CD4+; all others are labeled CD4-."))
      )
@@ -128,14 +142,14 @@ display_by_core = function(spe, phv, add_cd4=TRUE, add_multicol=TRUE) {
    )
   )
  server = function(input, output) {
-  output$coreview = renderPlot({
+  output$coreview = renderPlotly({
     newov = extract_core( input$core, spe )
     tmp = newov
-    save(tmp, file="tmp.rda")
+    #save(tmp, file="tmp.rda")
     if (add_multicol) {
       newov = add_multicol(newov)
       }
-    show_core(newov, input$phenotype)
+    ggplotly(show_core(newov, input$phenotype))
     })
   output$datatab = DT::renderDataTable({
     if (!exists("ovVP_summaries")) data("ovVP_summaries", package="BiocSpatialDemos")
